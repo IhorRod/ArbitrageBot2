@@ -3,10 +3,10 @@ import json
 
 from aiogram.dispatcher.filters import Text
 
-#from bestchange_listener import run_bestchange
+from bestchange_listener import run_bestchange
 from config import *
 from aiogram import Bot, Dispatcher, executor, types
-#from binance_connect import start_listening
+from binance_connect import start_listening
 from keyboards import *
 from States import StatesChange
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
@@ -105,6 +105,23 @@ async def process_diffquotes(callback_query: types.CallbackQuery):
     await callback_query.message.delete()
 
 
+@dp.callback_query_handler(lambda c: c.data == "change_as_maker")
+async def process_changemaker(callback_query: types.CallbackQuery):
+    parameters['maker'] = False if parameters['maker'] else True
+    temp_text = "Настройки бота на сейчас:\n" \
+                "Сумма для работы: {} RUB\n" \
+                "Минимальная доходность: {}%\n" \
+                "Минимальное кол-во положительных комментариев: {}\n" \
+                "Максимальное кол-во отрицательных комментариев: {}\n" \
+                "На бирже как мейкер: {}"
+    temp_text = temp_text.format(parameters["value"],
+                                 parameters["min_spread"],
+                                 parameters["min_good"],
+                                 parameters["max_bad"],
+                                 "Да" if parameters["maker"] else "Нет")
+    await callback_query.message.edit_text(temp_text, reply_markup=keyboard_inline_properties)
+
+
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('change'))
 async def process_change(callback_query: types.CallbackQuery):
     regime = callback_query.data[7:]
@@ -136,6 +153,11 @@ async def process_change(callback_query: types.CallbackQuery):
 @dp.callback_query_handler(lambda c: c.data == "add_exchanger", state=StatesChange.STATE_EMPTY)
 async def process_addexchanger1(callback_query: types.CallbackQuery):
     await process_addexchanger(callback_query)
+
+
+@dp.callback_query_handler(lambda c: c.data == "change_as_maker", state=StatesChange.STATE_EMPTY)
+async def process_changemaker1(callback_query: types.CallbackQuery):
+    await process_changemaker(callback_query)
 
 
 @dp.callback_query_handler(lambda c: c.data == "diff_exchanger", state=StatesChange.STATE_EMPTY)
@@ -170,7 +192,7 @@ async def all_updater(message: types.Message):
 @dp.message_handler(Text(equals="Настройки⚙️"))
 async def parameters_get(message: types.Message):
     temp_text = "Настройки бота на сейчас:\n" \
-                "Сумма для работы: {} USDT\n" \
+                "Сумма для работы: {} RUB\n" \
                 "Минимальная доходность: {}%\n" \
                 "Минимальное кол-во положительных комментариев: {}\n" \
                 "Максимальное кол-во отрицательных комментариев: {}\n" \
@@ -179,7 +201,7 @@ async def parameters_get(message: types.Message):
                                  parameters["min_spread"],
                                  parameters["min_good"],
                                  parameters["max_bad"],
-                                 "Да" if parameters["max_bad"] else "Нет")
+                                 "Да" if parameters["maker"] else "Нет")
     await message.answer(temp_text, reply_markup=keyboard_inline_properties)
 
 
@@ -351,8 +373,8 @@ async def echo(message: types.Message):
 
 
 if __name__ == '__main__':
-    #run_bestchange()
-    #start_listening()
+    run_bestchange()
+    start_listening()
     main()
 
 '''

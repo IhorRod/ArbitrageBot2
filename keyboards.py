@@ -29,6 +29,10 @@ keyboard_inline_properties.add(InlineKeyboardButton(
     "Изменить макс плохих комментов",
     callback_data="change_max_bad"
 ))
+keyboard_inline_properties.add(InlineKeyboardButton(
+    "Изменить метод работы на рынке",
+    callback_data="change_as_maker"
+))
 
 keyboard_inline_quoteschange = InlineKeyboardMarkup()
 keyboard_inline_quoteschange.add(InlineKeyboardButton(
