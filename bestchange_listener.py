@@ -13,39 +13,49 @@ async def run_bestchange1():
     await asyncio.get_event_loop().run_in_executor(None, update_cots)
 
 
-def calculate(give: float, get: float, from_cot: str, to_cot: str):
+def calculate(give: float, get: float, cot: str):
     value = float(parameters['value'])
-    volume_from = value / quotes[from_cot][1]
-    volume_to = (volume_from / give) * get
-    value1 = volume_to * quotes[to_cot][2]
-    return value1, volume_from, volume_to
+    value_krip = (value / give) * get
+    if parameters["maker"]:
+        cot_usdt = cotirs[cot][1]
+        value_usdt = value_krip * cot_usdt
+        cot_rub = cotirs["USDTRUB"][1]
+        value_end = value_usdt * cot_rub
+    else:
+        cot_usdt = cotirs[cot][0]
+        value_usdt = value_krip * cot_usdt
+        cot_rub = cotirs["USDTRUB"][0]
+        value_end = value_usdt * cot_rub
+    return value_krip, value_usdt, value_end, cot_usdt, cot_rub
 
 
 def update_cots():
     while True:
+        print("start")
+        start_time_all = time.time()
         config.list_bestchange = get_cots()
+        print("finish all in", time.time() - start_time_all)
+        if len(config.list_bestchange) > 5:
+            config.list_bestchange = config.list_bestchange[:5]
         print(config.list_bestchange)
         time.sleep(60)
 
 
 def get_cots():
-    print("start")
     start_time = time.time()
     api = BestChange()
-    print("finish in", time.time() - start_time)
+    print("finish connect in", time.time() - start_time)
     lst_temp = []
-    for i in banks:
-        for j in quotes:
-            print("SMTH")
-            if i != j \
-                    and quotes[i][1] != 0 \
-                    and quotes[j][1] != 0 \
-                    and i not in quotes_black \
-                    and j not in quotes_black:
+    for key_bank, code_bank in banks.items():
+        for key_quote, code_quote in quotes.items():
+            if cotirs[key_quote][0] != 0 \
+                    and cotirs["USDTRUB"] != 0 \
+                    and key_quote not in quotes_black \
+                    and key_bank not in banks_black:
 
                 cots = api.rates().filter(
-                    quotes[i][0],
-                    quotes[j][0]
+                    code_bank,
+                    code_quote
                 )
                 check = False
                 for k in cots:
@@ -55,27 +65,27 @@ def get_cots():
                             and not check \
                             and k['exchange_id'] not in exchangers_black:
 
-                        temp_calc = calculate(float(k['give']), float(k['get']), i, j)
+                        temp_calc = calculate(float(k['give']), float(k['get']), key_quote)
 
-                        abs_diff = round(temp_calc[0], 2)
+                        abs_diff = round(temp_calc[2], 2)
                         diff = round(((abs_diff / float(parameters['value'])) - 1) * 100, 1)
                         # print(i, j, diff, abs_diff)
                         if diff >= parameters['min_spread']:
                             check = True
                             lst_temp.append(
                                 {
-                                    'from': i[:-4],
-                                    'to': j[:-4],
+                                    'from': key_bank,
+                                    'to': key_quote[:-4],
                                     'spread_abs': abs_diff,
                                     'spread_proc': diff,
                                     'link': "https://www.bestchange.ru/click.php?id={}&from={}&to={}&city=0"
                                     .format(k["exchange_id"], k["give_id"], k["get_id"]),
-                                    'buy': quotes[i][1],
-                                    'sell': quotes[j][2],
+                                    'sell_krip': temp_calc[3],
+                                    'sell_usdt': temp_calc[4],
                                     'give': k['give'],
                                     'get': k['get'],
-                                    'from_val': temp_calc[1],
-                                    'to_val': temp_calc[2]
+                                    'val_krip': temp_calc[0],
+                                    'val_usdt': temp_calc[1]
                                 }
                             )
     lst_temp.sort(key=lambda x: -x['spread_abs'])

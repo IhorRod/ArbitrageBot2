@@ -17,34 +17,33 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 
 
 async def update(id) -> int:
-    text_quote = "1. USDT->{}\n" \
-                 "Покупка по маркету за: {}\n" \
-                 "Ссылка:{}\n" \
-                 "2. {}->{}\n" \
-                 "Курс обмена: {} {} на {} {}\n" \
-                 "Отдаете примерно: {} {}\n" \
-                 "Получаете примерно: {} {}\n" \
-                 "Ссылка на обменник: {}\n" \
-                 "3. {}->USDT\n" \
-                 "Продажа по маркету: {}\n" \
-                 "Ссылка:{}\n\n" \
-                 "Итоговая сумма: {} USDT\n" \
-                 "Процентный спред: {}%"
+    text_quote = "1. {} -> {}\n" \
+                 "Обмен {} RUB на {} {}\n" \
+                 "Примерный объем: {} {}\n" \
+                 "Ссылка: {}\n" \
+                 "2. {} -> USDT\n" \
+                 "Цена: {} USDT\n" \
+                 "Примерный объем: {} USDT\n" \
+                 "Ссылка: {}\n" \
+                 "3. USDT -> RUB\n" \
+                 "Цена: {} RUB\n" \
+                 "Ссылка: {}\n" \
+                 "Конечная сумма:{} RUB\n" \
+                 "Спред: {}%"
     if len(config.list_bestchange) != 0:
         for i in config.list_bestchange:
             await bot.send_message(id,
                                    text=text_quote.format(
-                                       i['from'], i['buy'],
-                                       "https://www.binance.com/ru-UA/trade/{}_USDT?theme=dark&type=spot"
-                                       .format(i['from']),
                                        i['from'], i['to'],
-                                       i['give'], i['from'], i['get'], i['to'],
-                                       i['from_val'], i['from'],
-                                       i['to_val'], i['to'],
+                                       i['give'], i['get'], i['to'],
+                                       i['val_krip'], i['to'],
                                        i['link'],
-                                       i['to'], i['sell'],
-                                       "https://www.binance.com/ru-UA/trade/{}_USDT?theme=dark&type=spot"
-                                       .format(i['to']),
+                                       i['to'],
+                                       i['sell_krip'],
+                                       i['val_usdt'],
+                                       "https://www.binance.com/ru-UA/trade/{}_USDT".format(i['to']),
+                                       i['sell_usdt'],
+                                       "https://www.binance.com/ru-UA/trade/USDT_RUB",
                                        i['spread_abs'], i['spread_proc']))
     return len(config.list_bestchange)
 

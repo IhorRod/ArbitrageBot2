@@ -13,7 +13,6 @@ async def main():
             res = await tscm.recv()
             if res['s'] in cotirs:
                 cotirs[res['s']] = (float(res['b']), float(res['a']))
-                print(cotirs)
 
 
 def start_listening():

@@ -2,15 +2,16 @@ import json
 
 API_TOKEN = "5779105062:AAE0g_K0Cnba2CBO6kkpB1mAS9Rt1xoBRSI"
 parameters = {
-    "value": 1000,
-    "min_spread": 0.5,
+    "value": 10000,
+    "min_spread": 0,
     "min_good": 100,
     "max_bad": 0,
     "maker": True
 }
+list_bestchange = []
 exchangers_black = {}
 quotes_black = []
-
+banks_black = []
 with open("quotes.json", "r") as read_file:
     quotes: dict = json.load(read_file)
 
