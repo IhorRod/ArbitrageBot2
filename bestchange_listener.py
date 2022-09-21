@@ -12,20 +12,11 @@ def run_bestchange():
 async def run_bestchange1():
     await asyncio.get_event_loop().run_in_executor(None, update_cots)
 
-
-def calculate(give: float, get: float, cot: str):
-    value = float(parameters['value'])
+@jit(nopython=True, cache=True)
+def calculate(value:float, give: float, get: float, cot_usdt: float, cot_rub: float):
     value_krip = (value / give) * get
-    if parameters["maker"]:
-        cot_usdt = cotirs[cot][1]
-        value_usdt = value_krip * cot_usdt
-        cot_rub = cotirs["USDTRUB"][1]
-        value_end = value_usdt * cot_rub
-    else:
-        cot_usdt = cotirs[cot][0]
-        value_usdt = value_krip * cot_usdt
-        cot_rub = cotirs["USDTRUB"][0]
-        value_end = value_usdt * cot_rub
+    value_usdt = value_krip * cot_usdt
+    value_end = value_usdt * cot_rub
     return value_krip, value_usdt, value_end, cot_usdt, cot_rub
 
 
@@ -65,7 +56,10 @@ def get_cots():
                             and not check \
                             and k['exchange_id'] not in exchangers_black:
 
-                        temp_calc = calculate(float(k['give']), float(k['get']), key_quote)
+                        if parameters["maker"]:
+                            temp_calc = calculate(float(parameters['value']), float(k['give']), float(k['get']), cotirs[key_quote][1], cotirs["USDTRUB"][1])
+                        else:
+                            temp_calc = calculate(float(parameters['value']), float(k['give']), float(k['get']), cotirs[key_quote][0], cotirs["USDTRUB"][0])
 
                         abs_diff = round(temp_calc[2], 2)
                         diff = round(((abs_diff / float(parameters['value'])) - 1) * 100, 1)
