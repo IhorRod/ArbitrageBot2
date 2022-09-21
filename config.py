@@ -15,8 +15,9 @@ banks_black = []
 with open("quotes.json", "r") as read_file:
     quotes: dict = json.load(read_file)
 
-with open("banks.json", "r") as read_file:
+with open("banks.json", "r", encoding='utf-8') as read_file:
     banks: dict = json.load(read_file)
+
 
 cotirs = {key: (0, 0) for key in quotes.keys()}
 cotirs["USDTRUB"] = (0, 0)

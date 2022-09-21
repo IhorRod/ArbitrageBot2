@@ -51,7 +51,7 @@ async def update(id) -> int:
 async def updates(id):
     while True:
         await update(id)
-        await asyncio.sleep(60)
+        await asyncio.sleep(70)
 
 
 def main():
@@ -101,6 +101,26 @@ async def process_diffquotes(callback_query: types.CallbackQuery):
                            text="Введите название криптовалюты, которую хотите добавить в ЧС:",
                            reply_markup=keyboard_cancel)
     await state.set_state(StatesChange.STATE_DIFF_QUOTE)
+    await callback_query.message.delete()
+
+
+@dp.callback_query_handler(lambda c: c.data == "add_bank")
+async def process_addbank(callback_query: types.CallbackQuery):
+    state = dp.current_state(chat=callback_query.message.chat.id, user=callback_query.from_user.id)
+    await bot.send_message(callback_query.from_user.id,
+                           text="Введите название банка, который хотите убрать из ЧС:",
+                           reply_markup=keyboard_cancel)
+    await state.set_state(StatesChange.STATE_ADD_BANK)
+    await callback_query.message.delete()
+
+
+@dp.callback_query_handler(lambda c: c.data == "diff_bank")
+async def process_diffbank(callback_query: types.CallbackQuery):
+    state = dp.current_state(chat=callback_query.message.chat.id, user=callback_query.from_user.id)
+    await bot.send_message(callback_query.from_user.id,
+                           text="Введите название банка, который хотите добавить в ЧС:",
+                           reply_markup=keyboard_cancel)
+    await state.set_state(StatesChange.STATE_DIFF_BANK)
     await callback_query.message.delete()
 
 
@@ -174,6 +194,16 @@ async def process_diffquotes1(callback_query: types.CallbackQuery):
     await process_diffquotes(callback_query)
 
 
+@dp.callback_query_handler(lambda c: c.data == "add_bank", state=StatesChange.STATE_EMPTY)
+async def process_addbank1(callback_query: types.CallbackQuery):
+    await process_addbank(callback_query)
+
+
+@dp.callback_query_handler(lambda c: c.data == "diff_bank", state=StatesChange.STATE_EMPTY)
+async def process_diffbank1(callback_query: types.CallbackQuery):
+    await process_diffbank(callback_query)
+
+
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('change'), state=StatesChange.STATE_EMPTY)
 async def process_change1(callback_query: types.CallbackQuery):
     await process_change(callback_query)
@@ -225,6 +255,19 @@ async def quotes_change(message: types.Message):
     await message.answer(temp_text, reply_markup=keyboard_inline_quoteschange)
 
 
+@dp.message_handler(Text(equals="Черный список банков🏦"))
+async def banks_change(message: types.Message):
+    temp_text = "Доступные сейчас банки к работе:\n"
+    for i in banks.keys():
+        if i not in banks_black:
+            temp_text += "{}, ".format(i[:-4])
+    temp_text = temp_text[:-2] + "\nЧерный список: \n"
+    for i in banks_black:
+        temp_text += "{}, ".format(i[:-4])
+    temp_text = temp_text[:-2]
+    await message.answer(temp_text, reply_markup=keyboard_inline_bankschange)
+
+
 @dp.message_handler(Text(equals="Отменить❌"), state='*')
 async def cancel_operation(message: types.Message):
     state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
@@ -264,6 +307,11 @@ async def exchangers_change1(message: types.Message):
 @dp.message_handler(Text(equals="Обновить🔃"), state=StatesChange.STATE_EMPTY)
 async def update_get1(message: types.Message):
     await update_get(message)
+
+
+@dp.message_handler(Text(equals="Черный список банков🏦"), state=StatesChange.STATE_EMPTY)
+async def banks_change1(message: types.Message):
+    await banks_change(message)
 
 
 @dp.message_handler(state=StatesChange.STATE_VALUE)
@@ -333,6 +381,35 @@ async def process_diffquote_read(message: types.Message):
             await message.answer("Криптовалюта {} уже в ЧС".format(message.text))
     else:
         await message.answer("Нет криптовалюты {} в доступных".format(message.text))
+
+
+@dp.message_handler(state=StatesChange.STATE_ADD_BANK)
+async def process_addbank_read(message: types.Message):
+    bank = message.text+" RUB"
+    if bank in banks_black:
+        banks_black.remove(bank)
+        await message.answer("Банк {} убран из ЧС".format(message.text), reply_markup=keyboard_main)
+        state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
+        await state.set_state(StatesChange.STATE_EMPTY)
+        await banks_change(message)
+    else:
+        await message.answer("Нет банка {} в ЧС".format(message.text))
+
+
+@dp.message_handler(state=StatesChange.STATE_DIFF_BANK)
+async def process_diffbank_read(message: types.Message):
+    bank = message.text+" RUB"
+    if bank in banks:
+        if bank not in banks_black:
+            banks_black.append(bank)
+            await message.answer("Банк {} добавлен в ЧС".format(message.text), reply_markup=keyboard_main)
+            state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
+            await state.set_state(StatesChange.STATE_EMPTY)
+            await banks_change(message)
+        else:
+            await message.answer("Банк {} уже в ЧС".format(message.text))
+    else:
+        await message.answer("Нет банка {} в доступных".format(message.text))
 
 
 @dp.message_handler(state=StatesChange.STATE_ADD_EXCHANGER)

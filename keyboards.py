@@ -6,7 +6,8 @@ keyboard_empty = ReplyKeyboardMarkup()
 
 keyboard_main = ReplyKeyboardMarkup(resize_keyboard=True)
 keyboard_main.add(KeyboardButton("Настройки⚙️"), KeyboardButton("Обновить🔃"))
-keyboard_main.add(KeyboardButton("Черный список валют💰️"), KeyboardButton("Черный список обменников💱"))
+keyboard_main.add(KeyboardButton("Черный список валют💰️"), KeyboardButton("Черный список обменников💱")),
+keyboard_main.add(KeyboardButton("Черный список банков🏦"))
 keyboard_main.add(KeyboardButton("Включить постоянное обновление📖"))
 
 keyboard_cancel = ReplyKeyboardMarkup(resize_keyboard=True)
@@ -42,6 +43,16 @@ keyboard_inline_quoteschange.add(InlineKeyboardButton(
 keyboard_inline_quoteschange.add(InlineKeyboardButton(
     "Убрать криптовалюту из ЧС➖",
     callback_data="add_quotes"
+))
+
+keyboard_inline_bankschange = InlineKeyboardMarkup()
+keyboard_inline_bankschange.add(InlineKeyboardButton(
+    "Добавить банк в ЧС➕",
+    callback_data="diff_bank"
+))
+keyboard_inline_bankschange.add(InlineKeyboardButton(
+    "Убрать банк из ЧС➖",
+    callback_data="add_bank"
 ))
 
 keyboard_inline_exchangerschange=InlineKeyboardMarkup()

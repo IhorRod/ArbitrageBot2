@@ -9,5 +9,7 @@ class StatesChange(StatesGroup):
     STATE_MAX_BAD = State()
     STATE_ADD_QUOTE = State()
     STATE_DIFF_QUOTE = State()
+    STATE_ADD_BANK = State()
+    STATE_DIFF_BANK = State()
     STATE_ADD_EXCHANGER = State()
     STATE_DIFF_EXCHANGER = State()
