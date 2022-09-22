@@ -1,6 +1,6 @@
 import json
 import os
-API_TOKEN = os.environ.get("API_TOKEN1")
+API_TOKEN = os.environ.get("API_TOKEN_SEC")
 parameters = {
     "value": 10000,
     "min_spread": 0,
