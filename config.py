@@ -1,6 +1,6 @@
 import json
 
-API_TOKEN = "5779105062:AAE0g_K0Cnba2CBO6kkpB1mAS9Rt1xoBRSI"
+API_TOKEN = os.environ.get("API_TOKEN1")
 parameters = {
     "value": 10000,
     "min_spread": 0,
