@@ -3,7 +3,7 @@ import time
 import config
 from config import *
 from bestchange_api import BestChange
-
+from numba import jit
 
 def run_bestchange():
     asyncio.Task(run_bestchange1())
