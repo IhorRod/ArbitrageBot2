@@ -26,10 +26,8 @@ def update_cots():
         start_time_all = time.time()
         config.list_bestchange = get_cots()
         print("finish all in", time.time() - start_time_all)
-        if len(config.list_bestchange) > 5:
-            config.list_bestchange = config.list_bestchange[:5]
-        print(config.list_bestchange)
-        time.sleep(60)
+        if len(config.list_bestchange) > 20:
+            config.list_bestchange = config.list_bestchange[:20]
 
 
 def get_cots():
