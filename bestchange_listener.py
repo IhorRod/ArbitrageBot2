@@ -62,7 +62,7 @@ def get_cots():
                         abs_diff = round(temp_calc[2], 2)
                         diff = round(((abs_diff / float(parameters['value'])) - 1) * 100, 1)
                         # print(i, j, diff, abs_diff)
-                        if diff >= parameters['min_spread']:
+                        if diff >= parameters['min_spread'] and parameters['value']>=k['min_sum'] and parameters['value']<=k['max_sum']:
                             check = True
                             lst_temp.append(
                                 {
