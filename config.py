@@ -1,17 +1,15 @@
 import json
 import os
 API_TOKEN = os.environ.get("API_TOKEN_SEC")
-parameters = {
-    "value": 10000,
-    "min_spread": 0,
-    "min_good": 100,
-    "max_bad": 0,
-    "maker": True
-}
 list_bestchange = []
-exchangers_black = {}
-quotes_black = []
-banks_black = []
+with open('config.json') as json_file:
+    parameters: dict = json.load(json_file)
+with open('exch_black.json') as json_file:
+    exchangers_black: dict = json.load(json_file)
+with open('quotes_black.txt') as f:
+    quotes_black: list = f.read().split("\n")
+with open('banks_black.txt') as f:
+    banks_black: list = f.read().split("\n")
 with open("quotes.json", "r") as read_file:
     quotes: dict = json.load(read_file)
 
