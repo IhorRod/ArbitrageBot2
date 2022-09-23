@@ -54,7 +54,7 @@ def get_cots():
                             and not check \
                             and k['exchange_id'] not in exchangers_black:
 
-                        if parameters["maker"]:
+                        if parameters["maker"]==1:
                             temp_calc = calculate(float(parameters['value']), float(k['give']), float(k['get']), cotirs[key_quote][1], cotirs["USDTRUB"][1])
                         else:
                             temp_calc = calculate(float(parameters['value']), float(k['give']), float(k['get']), cotirs[key_quote][0], cotirs["USDTRUB"][0])
