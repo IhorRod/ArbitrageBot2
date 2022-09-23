@@ -6,7 +6,10 @@ from bestchange_api import BestChange
 from numba import jit
 
 def run_bestchange():
-    asyncio.Task(run_bestchange1())
+    try:
+        asyncio.Task(run_bestchange1())
+    except:
+        run_bestchange()
 
 
 async def run_bestchange1():
