@@ -1,0 +1,7 @@
+{
+    "value": 10000,
+    "min_spread": 0,
+    "min_good": 100,
+    "max_bad": 0,
+    "maker": 1
+}

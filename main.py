@@ -1,5 +1,4 @@
 import asyncio
-import json
 
 from aiogram.dispatcher.filters import Text
 
@@ -10,10 +9,31 @@ from binance_connect import start_listening
 from keyboards import *
 from States import StatesChange
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from bestchange_exchangers import run_bestchange_exchange
 import config
 
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
+
+
+def save_config():
+    with open("config.json", 'w') as f:
+        json.dump(parameters, f)
+
+
+def save_black():
+    with open("exch_black.json", 'w') as f:
+        json.dump(exchangers_black, f)
+
+
+def save_black_quotes():
+    with open("quotes_black.txt", 'w') as f:
+        f.write("\n".join(quotes_black))
+
+
+def save_black_banks():
+    with open("banks_black.txt", 'w') as f:
+        f.write("\n".join(banks_black))
 
 
 async def update(id) -> int:
@@ -137,7 +157,7 @@ async def process_changemaker(callback_query: types.CallbackQuery):
                                  parameters["min_spread"],
                                  parameters["min_good"],
                                  parameters["max_bad"],
-                                 "Да" if parameters["maker"] else "Нет")
+                                 "Да" if parameters["maker"] == 1 else "Нет")
     await callback_query.message.edit_text(temp_text, reply_markup=keyboard_inline_properties)
 
 
@@ -319,6 +339,7 @@ async def process_value_change(message: types.Message):
     parameters["value"] = int(message.text)
     state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
     await state.set_state(StatesChange.STATE_EMPTY)
+    save_config()
     await message.answer("Изменено рабочее количество валюты",
                          reply_markup=keyboard_main)
     await parameters_get(message)
@@ -329,6 +350,7 @@ async def process_value_change(message: types.Message):
     parameters["min_spread"] = float(message.text)
     state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
     await state.set_state(StatesChange.STATE_EMPTY)
+    save_config()
     await message.answer("Изменен требуемый минимальный спред",
                          reply_markup=keyboard_main)
     await parameters_get(message)
@@ -339,6 +361,7 @@ async def process_value_change(message: types.Message):
     parameters["min_good"] = int(message.text)
     state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
     await state.set_state(StatesChange.STATE_EMPTY)
+    save_config()
     await message.answer("Изменено минимальное количество хороших комментариев",
                          reply_markup=keyboard_main)
     await parameters_get(message)
@@ -349,6 +372,7 @@ async def process_value_change(message: types.Message):
     parameters["max_bad"] = int(message.text)
     state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
     await state.set_state(StatesChange.STATE_EMPTY)
+    save_config()
     await message.answer("Изменено максимальное количество плохих комментариев",
                          reply_markup=keyboard_main)
     await parameters_get(message)
@@ -361,6 +385,7 @@ async def process_addquote_read(message: types.Message):
         quotes_black.remove(quote)
         await message.answer("Криптовалюта {} убрана из ЧС".format(message.text), reply_markup=keyboard_main)
         state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
+        save_black_quotes()
         await state.set_state(StatesChange.STATE_EMPTY)
         await quotes_change(message)
     else:
@@ -375,6 +400,7 @@ async def process_diffquote_read(message: types.Message):
             quotes_black.append(quote)
             await message.answer("Криптовалюта {} добавлена в ЧС".format(message.text), reply_markup=keyboard_main)
             state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
+            save_black_quotes()
             await state.set_state(StatesChange.STATE_EMPTY)
             await quotes_change(message)
         else:
@@ -385,11 +411,12 @@ async def process_diffquote_read(message: types.Message):
 
 @dp.message_handler(state=StatesChange.STATE_ADD_BANK)
 async def process_addbank_read(message: types.Message):
-    bank = message.text+" RUB"
+    bank = message.text + " RUB"
     if bank in banks_black:
         banks_black.remove(bank)
         await message.answer("Банк {} убран из ЧС".format(message.text), reply_markup=keyboard_main)
         state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
+        save_black_banks()
         await state.set_state(StatesChange.STATE_EMPTY)
         await banks_change(message)
     else:
@@ -398,12 +425,13 @@ async def process_addbank_read(message: types.Message):
 
 @dp.message_handler(state=StatesChange.STATE_DIFF_BANK)
 async def process_diffbank_read(message: types.Message):
-    bank = message.text+" RUB"
+    bank = message.text + " RUB"
     if bank in banks:
         if bank not in banks_black:
             banks_black.append(bank)
             await message.answer("Банк {} добавлен в ЧС".format(message.text), reply_markup=keyboard_main)
             state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
+            save_black_banks()
             await state.set_state(StatesChange.STATE_EMPTY)
             await banks_change(message)
         else:
@@ -413,12 +441,13 @@ async def process_diffbank_read(message: types.Message):
 
 
 @dp.message_handler(state=StatesChange.STATE_ADD_EXCHANGER)
-async def process_addquote_read(message: types.Message):
+async def process_addexch_read(message: types.Message):
     exchanger = int(message.text)
     if exchanger in exchangers_black:
         exchangers_black.pop(exchanger)
         await message.answer("Обменник {} убран из ЧС".format(exchanger), reply_markup=keyboard_main)
         state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
+        save_black()
         await state.set_state(StatesChange.STATE_EMPTY)
         await exchangers_change(message)
     else:
@@ -426,7 +455,7 @@ async def process_addquote_read(message: types.Message):
 
 
 @dp.message_handler(state=StatesChange.STATE_DIFF_EXCHANGER)
-async def process_diffquote_read(message: types.Message):
+async def process_diffexch_read(message: types.Message):
     with open("exchangers.json", "r") as read_file:
         data: dict = json.load(read_file)
     exchanger = message.text
@@ -435,6 +464,7 @@ async def process_diffquote_read(message: types.Message):
             exchangers_black[data[exchanger]] = exchanger
             await message.answer("Обменник {} добавлен в ЧС".format(exchanger), reply_markup=keyboard_main)
             state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
+            save_black()
             await state.set_state(StatesChange.STATE_EMPTY)
             await exchangers_change(message)
         else:
@@ -449,19 +479,7 @@ async def echo(message: types.Message):
 
 
 if __name__ == '__main__':
+    run_bestchange_exchange()
     run_bestchange()
     start_listening()
     main()
-
-'''
-print("Start")
-    api = BestChange()
-    print("Finish")
-    temp_dict = {}
-    exchangers = api.exchangers().get()
-    for i in exchangers:
-        data = exchangers[i]
-        temp_dict[data['name']] = data['id']
-    with open("exchangers.json", 'w') as f:
-        json.dump(temp_dict, f)
-'''
