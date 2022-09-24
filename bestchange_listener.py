@@ -7,14 +7,15 @@ from numba import jit
 
 def run_bestchange():
     time.sleep(15)
-    try:
-        asyncio.Task(run_bestchange1())
-    except:
-        run_bestchange()
+    asyncio.Task(run_bestchange1())
 
 
 async def run_bestchange1():
-    await asyncio.get_event_loop().run_in_executor(None, update_cots)
+    try:
+        await asyncio.get_event_loop().run_in_executor(None, update_cots)
+    except:
+        print("out")
+        run_bestchange()
 
 @jit(nopython=True, cache=True)
 def calculate(value:float, give: float, get: float, cot_usdt: float, cot_rub: float):
