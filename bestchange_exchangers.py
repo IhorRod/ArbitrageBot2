@@ -6,15 +6,16 @@ import asyncio
 
 
 def run_bestchange_exchange():
-    try:
-        asyncio.Task(run_bestchange_exchange1())
-    except:
-        run_bestchange_exchange()
+    asyncio.Task(run_bestchange_exchange1())
+
 
 
 async def run_bestchange_exchange1():
-    await asyncio.get_event_loop().run_in_executor(None, update_exchangers)
-
+    try:
+        await asyncio.get_event_loop().run_in_executor(None, update_exchangers)
+    except:
+        run_bestchange_exchange()
+    
 
 def update_exchangers():
     while True:
