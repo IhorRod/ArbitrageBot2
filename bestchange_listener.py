@@ -86,4 +86,17 @@ def get_cots():
                                 }
                             )
     lst_temp.sort(key=lambda x: -x['spread_abs'])
+    
+    temp_dict = {}
+    exchangers = api.exchangers().get()
+    with open("exchangers.json", 'r') as f:
+        temp_dict = json.load(f)
+    print("start len", len(temp_dict))
+    for i in exchangers:
+        data = exchangers[i]
+        temp_dict[data['name']] = data['id']
+    with open("exchangers.json", 'w') as f:
+        json.dump(temp_dict, f)
+    print("end len", len(temp_dict))
+    
     return lst_temp
