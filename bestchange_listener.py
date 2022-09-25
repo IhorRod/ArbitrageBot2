@@ -6,7 +6,7 @@ from bestchange_api import BestChange
 from numba import jit
 
 def run_bestchange():
-    time.sleep(15)
+    time.sleep(10)
     asyncio.Task(run_bestchange1())
 
 
