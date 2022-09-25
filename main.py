@@ -460,8 +460,8 @@ async def process_diffexch_read(message: types.Message):
         data: dict = json.load(read_file)
     exchanger = message.text
     if data.get(exchanger) != -1:
-        if data[exchanger] not in exchangers_black:
-            exchangers_black[data[exchanger]] = exchanger
+        if int(data[exchanger]) not in exchangers_black:
+            exchangers_black[int(data[exchanger])] = exchanger
             await message.answer("Обменник {} добавлен в ЧС".format(exchanger), reply_markup=keyboard_main)
             state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
             save_black()
