@@ -5,7 +5,10 @@ list_bestchange = []
 with open('config.json') as json_file:
     parameters: dict = json.load(json_file)
 with open('exch_black.json') as json_file:
-    exchangers_black: dict = json.load(json_file)
+    exchangers_black_temp: dict = json.load(json_file)
+    exchangers_black: dict = {}
+    for i in exchangers_black_temp:
+        exchangers_black[int(i)]=exchangers_black_temp[i]
 with open('quotes_black.txt') as f:
     quotes_black: list = f.read().split("\n")
 with open('banks_black.txt') as f:
