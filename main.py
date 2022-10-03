@@ -40,7 +40,8 @@ async def update(id) -> int:
     text_quote = "1. {} -> {}\n" \
                  "Обмен {} RUB на {} {}\n" \
                  "Примерный объем: {} {}\n" \
-                 "Ссылка: {}\n" \
+                 "Название обменника: {}\n" \
+                 "Ссылка на обменник: {}\n" \
                  "2. {} -> USDT\n" \
                  "Цена: {} USDT\n" \
                  "Примерный объем: {} USDT\n" \
@@ -57,6 +58,7 @@ async def update(id) -> int:
                                        i['from'], i['to'],
                                        i['give'], i['get'], i['to'],
                                        i['val_krip'], i['to'],
+                                       i['exch_name'],
                                        i['link'],
                                        i['to'],
                                        i['sell_krip'],
