@@ -13,8 +13,8 @@ def run_bestchange():
 async def run_bestchange1():
     try:
         await asyncio.get_event_loop().run_in_executor(None, update_cots)
-    except:
-        print("out")
+    except Exception:
+        traceback.print_exc()
         run_bestchange()
 
 @jit(nopython=True, cache=True)
@@ -69,6 +69,11 @@ def get_cots():
                         # print(i, j, diff, abs_diff)
                         if diff >= parameters['min_spread'] and parameters['value']>=k['min_sum'] and parameters['value']<=k['max_sum']:
                             check = True
+                            with open("exchangers.json", "r") as read_file:
+                                exchangers_names: dict = json.load(read_file)
+                            for f in exchangers_names:
+                                if int(exchangers_names[f]) == k["exchange_id"]:
+                                    exch_name: str = f
                             lst_temp.append(
                                 {
                                     'from': key_bank,
@@ -82,7 +87,8 @@ def get_cots():
                                     'give': k['give'],
                                     'get': k['get'],
                                     'val_krip': temp_calc[0],
-                                    'val_usdt': temp_calc[1]
+                                    'val_usdt': temp_calc[1],
+                                    'exch_name': exch_name
                                 }
                             )
     lst_temp.sort(key=lambda x: -x['spread_abs'])
