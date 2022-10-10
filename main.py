@@ -14,7 +14,7 @@ import config
 
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
-
+IDS = [1216349318, 489124710]
 
 def save_config():
     with open("config.json", 'w') as f:
@@ -82,7 +82,8 @@ def main():
 
 @dp.message_handler(commands=["start"])
 async def start(message: types.Message):
-    await message.answer("Добро пожаловать в бота который сканирует Бестчендж и Бинанс, находя связки",
+    if message.from_id in IDS:
+        await message.answer("Добро пожаловать в бота который сканирует Бестчендж и Бинанс, находя связки",
                          reply_markup=keyboard_main)
 
 
@@ -236,8 +237,9 @@ async def all_updater(message: types.Message):
     text = "Бот начинает работу по поиску связок, поиск производится примерно раз в минуту\n" \
            "Изменять настройки можно прямо во время работы бота, они сразу же применяются.\n" \
            "Удачи в поиске связок!"
-    await message.answer(text=text)
-    asyncio.Task(updates(message.chat.id))
+    if message.from_id in IDS:
+        await message.answer(text=text)
+        asyncio.Task(updates(message.chat.id))
 
 
 @dp.message_handler(Text(equals="Настройки⚙️"))
@@ -253,15 +255,17 @@ async def parameters_get(message: types.Message):
                                  parameters["min_good"],
                                  parameters["max_bad"],
                                  "Да" if parameters["maker"] else "Нет")
-    await message.answer(temp_text, reply_markup=keyboard_inline_properties)
+    if message.from_id in IDS:
+        await message.answer(temp_text, reply_markup=keyboard_inline_properties)
 
 
 @dp.message_handler(Text(equals="Обновить🔃"))
 async def update_get(message: types.Message):
-    await message.answer("Начинается поиск связок!")
-    num = await update(message.chat.id)
-    if num == 0:
-        await message.answer("Связки не найдены")
+    if message.from_id in IDS:
+        await message.answer("Начинается поиск связок!")
+        num = await update(message.chat.id)
+        if num == 0:
+            await message.answer("Связки не найдены")
 
 
 @dp.message_handler(Text(equals="Черный список валют💰️"))
@@ -274,7 +278,8 @@ async def quotes_change(message: types.Message):
     for i in quotes_black:
         temp_text += "{}, ".format(i[:-4])
     temp_text = temp_text[:-2]
-    await message.answer(temp_text, reply_markup=keyboard_inline_quoteschange)
+    if message.from_id in IDS:
+        await message.answer(temp_text, reply_markup=keyboard_inline_quoteschange)
 
 
 @dp.message_handler(Text(equals="Черный список банков🏦"))
@@ -287,14 +292,16 @@ async def banks_change(message: types.Message):
     for i in banks_black:
         temp_text += "{}, ".format(i[:-4])
     temp_text = temp_text[:-2]
-    await message.answer(temp_text, reply_markup=keyboard_inline_bankschange)
+    if message.from_id in IDS:
+        await message.answer(temp_text, reply_markup=keyboard_inline_bankschange)
 
 
 @dp.message_handler(Text(equals="Отменить❌"), state='*')
 async def cancel_operation(message: types.Message):
-    state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
-    await state.set_state(StatesChange.STATE_EMPTY)
-    await message.answer("Операция отменена", reply_markup=keyboard_main)
+    if message.from_id in IDS:
+        state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
+        await state.set_state(StatesChange.STATE_EMPTY)
+        await message.answer("Операция отменена", reply_markup=keyboard_main)
 
 
 @dp.message_handler(Text(equals="Черный список обменников💱"))
@@ -303,7 +310,8 @@ async def exchangers_change(message: types.Message):
                 "Название - ID\n"
     for i in exchangers_black:
         temp_text += "{} - {}\n".format(exchangers_black[i], i)
-    await message.answer(temp_text, reply_markup=keyboard_inline_exchangerschange)
+    if message.from_id in IDS:
+        await message.answer(temp_text, reply_markup=keyboard_inline_exchangerschange)
 
 
 @dp.message_handler(Text(equals="Включить постоянное обновление📖"), state=StatesChange.STATE_EMPTY)
@@ -477,7 +485,8 @@ async def process_diffexch_read(message: types.Message):
 
 @dp.message_handler(state=StatesChange.STATE_EMPTY)
 async def echo(message: types.Message):
-    await message.answer("Не знаю такой команды =(")
+    if message.from_id in IDS:
+        await message.answer("Не знаю такой команды =(")
 
 
 if __name__ == '__main__':
